@@ -2,6 +2,15 @@ cmake_minimum_required(VERSION 3.5)
 project(pointcloud_to_laserscan)
 
 find_package(ament_cmake_auto REQUIRED)
+
+# pcl depends
+find_package(PCL REQUIRED)
+find_package(pcl_conversions REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+# message(STATUS ${PCL_INCLUDE_DIRS})
+include_directories(/usr/include/vtk-9.1)
+
+
 ament_auto_find_build_dependencies()
 
 ament_auto_add_library(laserscan_to_pointcloud SHARED

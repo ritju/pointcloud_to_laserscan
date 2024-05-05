@@ -57,6 +57,13 @@
 
 #include "pointcloud_to_laserscan/visibility_control.h"
 
+// pcl
+#include <pcl-1.12/pcl/io/pcd_io.h>
+#include <pcl-1.12/pcl/point_types.h>
+#include <pcl-1.12/pcl/filters/voxel_grid.h>
+#include<pcl-1.12/pcl/visualization/pcl_visualizer.h>
+#include <pcl_conversions/pcl_conversions.h>
+
 namespace pointcloud_to_laserscan
 {
 typedef tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2> MessageFilter;
