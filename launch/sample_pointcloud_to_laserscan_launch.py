@@ -3,6 +3,10 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
+leaf_size_x = 0.01
+leaf_size_y = 0.1
+leaf_size_z = 0.1
+
 parameters_back = [{
         'target_frame': 'camera3_color_frame',
         'transform_tolerance': 0.01,
@@ -15,7 +19,10 @@ parameters_back = [{
         'range_min': 0.3,
         'range_max': 5.0,
         'use_inf': True,
-        'inf_epsilon': 1.0
+        'inf_epsilon': 1.0,
+        'leaf_size_x': leaf_size_x,
+        'leaf_size_y': leaf_size_y,
+        'leaf_size_z': leaf_size_z,
     }]
 
 parameters_front_up = [{
@@ -30,7 +37,10 @@ parameters_front_up = [{
         'range_min': 0.3,
         'range_max': 5.0,
         'use_inf': True,
-        'inf_epsilon': 1.0
+        'inf_epsilon': 1.0,
+        'leaf_size_x': leaf_size_x,
+        'leaf_size_y': leaf_size_y,
+        'leaf_size_z': leaf_size_z,
     }]
 
 parameters_front_down = [{
@@ -45,7 +55,10 @@ parameters_front_down = [{
         'range_min': 0.3,
         'range_max': 5.0,
         'use_inf': True,
-        'inf_epsilon': 1.0
+        'inf_epsilon': 1.0,
+        'leaf_size_x': leaf_size_x,
+        'leaf_size_y': leaf_size_y,
+        'leaf_size_z': leaf_size_z,
     }]
 
 node_back = Node(
@@ -58,7 +71,9 @@ node_back = Node(
 
 node_front_up = Node(
     package='pointcloud_to_laserscan', executable='pointcloud_to_laserscan_node',
-    remappings=[('cloud_in', '/points_cloud_person'),
+    # remappings=[('cloud_in', '/points_cloud_person'),
+                # ('scan', 'point_scan_front_up')], 
+    remappings=[('cloud_in', '/camera1/depth/points'),
                 ('scan', 'point_scan_front_up')],
     parameters=parameters_front_up,
     name='pointcloud_to_laserscan_front_up'
@@ -77,7 +92,7 @@ def generate_launch_description():
     return LaunchDescription([
         node_back,
         node_front_up,
-        node_front_down,
+        # node_front_down,
         # DeclareLaunchArgument(
         #     name='scanner', default_value='scanner',
         #     description='Namespace for sample topics'

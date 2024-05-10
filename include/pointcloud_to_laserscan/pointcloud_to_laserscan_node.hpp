@@ -58,10 +58,10 @@
 #include "pointcloud_to_laserscan/visibility_control.h"
 
 // pcl
-#include <pcl-1.12/pcl/io/pcd_io.h>
-#include <pcl-1.12/pcl/point_types.h>
-#include <pcl-1.12/pcl/filters/voxel_grid.h>
-#include<pcl-1.12/pcl/visualization/pcl_visualizer.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/filters/voxel_grid.h>
+#include<pcl/visualization/pcl_visualizer.h>
 #include <pcl_conversions/pcl_conversions.h>
 
 namespace pointcloud_to_laserscan
@@ -102,6 +102,7 @@ private:
     range_max_;
   bool use_inf_;
   double inf_epsilon_;
+  float leaf_size_x_, leaf_size_y_, leaf_size_z_;
 };
 
 }  // namespace pointcloud_to_laserscan

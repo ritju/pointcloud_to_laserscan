@@ -74,6 +74,12 @@ PointCloudToLaserScanNode::PointCloudToLaserScanNode(const rclcpp::NodeOptions &
   range_max_ = this->declare_parameter("range_max", std::numeric_limits<double>::max());
   inf_epsilon_ = this->declare_parameter("inf_epsilon", 1.0);
   use_inf_ = this->declare_parameter("use_inf", true);
+  leaf_size_x_ = this->declare_parameter("leaf_size_x", 0.2);
+  leaf_size_y_ = this->declare_parameter("leaf_size_y", 0.2);
+  leaf_size_z_ = this->declare_parameter("leaf_size_z", 0.1);
+  RCLCPP_INFO(this->get_logger(), "leaf_size_x: %f", leaf_size_x_);
+  RCLCPP_INFO(this->get_logger(), "leaf_size_y: %f", leaf_size_y_);
+  RCLCPP_INFO(this->get_logger(), "leaf_size_z: %f", leaf_size_z_);
 
   pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::SensorDataQoS());
 
@@ -137,6 +143,57 @@ void PointCloudToLaserScanNode::subscriptionListenerThreadLoop()
 void PointCloudToLaserScanNode::cloudCallback(
   sensor_msgs::msg::PointCloud2::ConstSharedPtr cloud_msg)
 {
+  double time_start, time_end;
+  int time_cost;
+  
+  //  1. sensor_msgs::msg::PointCloud2 => pcl::PointCloud<pcl::PointXYZ>
+  time_start = this->get_clock()->now().seconds();
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PCLPointCloud2::Ptr pcl_cloud (new pcl::PCLPointCloud2());
+  pcl::fromROSMsg(*cloud_msg, *cloud);
+
+  // pcl::fromROSMsg(*pcl_cloud, *cloud);
+  // for (int i = 0; i < cloud_msg->width * cloud_msg->height; i++)
+  // {
+  //   pcl::PointXYZ p;
+  //   std::memcpy(&p.x, &cloud_msg->data[16*i], 4);
+  //   std::memcpy(&p.y, &cloud_msg->data[16*i+4], 4);
+  //   std::memcpy(&p.z, &cloud_msg->data[16*i+8], 4);
+  //   cloud->points.push_back(p);
+  // }
+
+  time_end = this->get_clock()->now().seconds();
+  time_cost = round((time_end - time_start) * 1000); // ms
+  RCLCPP_DEBUG_THROTTLE(get_logger(), *this->get_clock(), 5000, "step 1 cost %d ms.", time_cost);
+
+  // 2. pcl::pcl::PointCloud<pcl::PointXYZ> voxel_filter
+  time_start = this->get_clock()->now().seconds();
+
+  // pcl::PCLPointCloud2::Ptr pcl_cloud_filtered;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::VoxelGrid<pcl::PointXYZ> sor;
+  sor.setInputCloud(cloud);
+  sor.setLeafSize(leaf_size_x_, leaf_size_y_, leaf_size_z_);
+  sor.filter(*cloud_filtered);
+
+  time_end = this->get_clock()->now().seconds();
+  time_cost = round((time_end - time_start) * 1000); // ms
+  RCLCPP_DEBUG_THROTTLE(get_logger(), *this->get_clock(), 5000, "step 2 cost %d ms.", time_cost);
+
+  // 3. pcl::PointCloud<pcl::PointXYZ> => sensor_msgs::msg::PointCloud2
+  time_start = this->get_clock()->now().seconds();
+
+  sensor_msgs::msg::PointCloud2 cloud_msg_filtered;
+  pcl::toROSMsg(*cloud_filtered, cloud_msg_filtered);
+
+  time_end = this->get_clock()->now().seconds();
+  time_cost = round((time_end - time_start) * 1000); // ms
+  RCLCPP_DEBUG_THROTTLE(get_logger(), *this->get_clock(), 5000, "step 3 cost %d ms.", time_cost);
+
+  RCLCPP_DEBUG_THROTTLE(get_logger(), *this->get_clock(), 5000, 
+    "Data remaining %.1f%%", float(cloud_msg_filtered.width * cloud_msg_filtered.height) / (640 * 480) * 100);
+
   // build laserscan output
   auto scan_msg = std::make_unique<sensor_msgs::msg::LaserScan>();
   scan_msg->header = cloud_msg->header;
@@ -167,7 +224,7 @@ void PointCloudToLaserScanNode::cloudCallback(
   if (scan_msg->header.frame_id != cloud_msg->header.frame_id) {
     try {
       auto cloud = std::make_shared<sensor_msgs::msg::PointCloud2>();
-      tf2_->transform(*cloud_msg, *cloud, target_frame_, tf2::durationFromSec(tolerance_));
+      tf2_->transform(cloud_msg_filtered, *cloud, target_frame_, tf2::durationFromSec(tolerance_));
       cloud_msg = cloud;
     } catch (tf2::TransformException & ex) {
       RCLCPP_ERROR_STREAM(this->get_logger(), "Transform failure: " << ex.what());

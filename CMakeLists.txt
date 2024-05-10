@@ -6,9 +6,9 @@ find_package(ament_cmake_auto REQUIRED)
 # pcl depends
 find_package(PCL REQUIRED)
 find_package(pcl_conversions REQUIRED)
+find_package(VTK REQUIRED)
 include_directories(${PCL_INCLUDE_DIRS})
-# message(STATUS ${PCL_INCLUDE_DIRS})
-include_directories(/usr/include/vtk-9.1)
+include_directories(${VTK_INCLUDE_DIRS})
 
 
 ament_auto_find_build_dependencies()
@@ -22,6 +22,8 @@ rclcpp_components_register_node(laserscan_to_pointcloud
 
 ament_auto_add_library(pointcloud_to_laserscan SHARED
   src/pointcloud_to_laserscan_node.cpp)
+
+target_link_libraries(pointcloud_to_laserscan ${VTK_LIBRARIES} ${PCL_LIBRARIES} ${pcl_conversions_LIBRARIES})
 
 rclcpp_components_register_node(pointcloud_to_laserscan
   PLUGIN "pointcloud_to_laserscan::PointCloudToLaserScanNode"
