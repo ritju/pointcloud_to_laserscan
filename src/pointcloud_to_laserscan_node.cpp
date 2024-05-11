@@ -149,19 +149,8 @@ void PointCloudToLaserScanNode::cloudCallback(
   //  1. sensor_msgs::msg::PointCloud2 => pcl::PointCloud<pcl::PointXYZ>
   time_start = this->get_clock()->now().seconds();
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-  pcl::PCLPointCloud2::Ptr pcl_cloud (new pcl::PCLPointCloud2());
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);  
   pcl::fromROSMsg(*cloud_msg, *cloud);
-
-  // pcl::fromROSMsg(*pcl_cloud, *cloud);
-  // for (int i = 0; i < cloud_msg->width * cloud_msg->height; i++)
-  // {
-  //   pcl::PointXYZ p;
-  //   std::memcpy(&p.x, &cloud_msg->data[16*i], 4);
-  //   std::memcpy(&p.y, &cloud_msg->data[16*i+4], 4);
-  //   std::memcpy(&p.z, &cloud_msg->data[16*i+8], 4);
-  //   cloud->points.push_back(p);
-  // }
 
   time_end = this->get_clock()->now().seconds();
   time_cost = round((time_end - time_start) * 1000); // ms
@@ -170,7 +159,6 @@ void PointCloudToLaserScanNode::cloudCallback(
   // 2. pcl::pcl::PointCloud<pcl::PointXYZ> voxel_filter
   time_start = this->get_clock()->now().seconds();
 
-  // pcl::PCLPointCloud2::Ptr pcl_cloud_filtered;
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::VoxelGrid<pcl::PointXYZ> sor;
   sor.setInputCloud(cloud);
@@ -238,43 +226,43 @@ void PointCloudToLaserScanNode::cloudCallback(
     iter_x != iter_x.end(); ++iter_x, ++iter_y, ++iter_z)
   {
     if (std::isnan(*iter_x) || std::isnan(*iter_y) || std::isnan(*iter_z)) {
-      RCLCPP_DEBUG(
-        this->get_logger(),
-        "rejected for nan in point(%f, %f, %f)\n",
-        *iter_x, *iter_y, *iter_z);
+      // RCLCPP_DEBUG(
+      //   this->get_logger(),
+      //   "rejected for nan in point(%f, %f, %f)\n",
+      //   *iter_x, *iter_y, *iter_z);
       continue;
     }
 
     if (*iter_z > max_height_ || *iter_z < min_height_) {
-      RCLCPP_DEBUG(
-        this->get_logger(),
-        "rejected for height %f not in range (%f, %f)\n",
-        *iter_z, min_height_, max_height_);
+      // RCLCPP_DEBUG(
+      //   this->get_logger(),
+      //   "rejected for height %f not in range (%f, %f)\n",
+      //   *iter_z, min_height_, max_height_);
       continue;
     }
 
     double range = hypot(*iter_x, *iter_y);
     if (range < range_min_) {
-      RCLCPP_DEBUG(
-        this->get_logger(),
-        "rejected for range %f below minimum value %f. Point: (%f, %f, %f)",
-        range, range_min_, *iter_x, *iter_y, *iter_z);
+      // RCLCPP_DEBUG(
+      //   this->get_logger(),
+      //   "rejected for range %f below minimum value %f. Point: (%f, %f, %f)",
+      //   range, range_min_, *iter_x, *iter_y, *iter_z);
       continue;
     }
     if (range > range_max_) {
-      RCLCPP_DEBUG(
-        this->get_logger(),
-        "rejected for range %f above maximum value %f. Point: (%f, %f, %f)",
-        range, range_max_, *iter_x, *iter_y, *iter_z);
+      // RCLCPP_DEBUG(
+      //   this->get_logger(),
+      //   "rejected for range %f above maximum value %f. Point: (%f, %f, %f)",
+      //   range, range_max_, *iter_x, *iter_y, *iter_z);
       continue;
     }
 
     double angle = atan2(*iter_y, *iter_x);
     if (angle < scan_msg->angle_min || angle > scan_msg->angle_max) {
-      RCLCPP_DEBUG(
-        this->get_logger(),
-        "rejected for angle %f not in range (%f, %f)\n",
-        angle, scan_msg->angle_min, scan_msg->angle_max);
+      // RCLCPP_DEBUG(
+      //   this->get_logger(),
+      //   "rejected for angle %f not in range (%f, %f)\n",
+      //   angle, scan_msg->angle_min, scan_msg->angle_max);
       continue;
     }
 
