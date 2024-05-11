@@ -105,9 +105,9 @@ node_front_down = Node(
 def generate_launch_description():
     
     return LaunchDescription([
-        arg_log_level_front_up,
-        arg_log_level_front_down,
         arg_log_level_back,
+        arg_log_level_front_up,
+        # arg_log_level_front_down,
         
         node_back,
         node_front_up,
