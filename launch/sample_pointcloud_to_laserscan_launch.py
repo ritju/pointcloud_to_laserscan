@@ -77,7 +77,7 @@ def generate_launch_description():
     return LaunchDescription([
         node_back,
         node_front_up,
-        node_front_down,
+        # node_front_down,
         # DeclareLaunchArgument(
         #     name='scanner', default_value='scanner',
         #     description='Namespace for sample topics'
