@@ -51,7 +51,6 @@
 #include "sensor_msgs/point_cloud2_iterator.hpp"
 #include "tf2_sensor_msgs/tf2_sensor_msgs.hpp"
 #include "tf2_ros/create_timer_ros.h"
-
 namespace pointcloud_to_laserscan
 {
 
@@ -137,6 +136,20 @@ void PointCloudToLaserScanNode::subscriptionListenerThreadLoop()
 void PointCloudToLaserScanNode::cloudCallback(
   sensor_msgs::msg::PointCloud2::ConstSharedPtr cloud_msg)
 {
+  double scan_time;
+  rclcpp::Time start_scan_time;
+  static rclcpp::Time end_scan_time;
+  static bool first_scan = true;
+
+  start_scan_time = cloud_msg->header.stamp;
+  scan_time = (start_scan_time.seconds() - end_scan_time.seconds());
+
+  if (first_scan) {
+    first_scan = false;
+    end_scan_time = start_scan_time;
+    return;
+  }
+  
   // build laserscan output
   auto scan_msg = std::make_unique<sensor_msgs::msg::LaserScan>();
   scan_msg->header = cloud_msg->header;
@@ -148,7 +161,7 @@ void PointCloudToLaserScanNode::cloudCallback(
   scan_msg->angle_max = angle_max_;
   scan_msg->angle_increment = angle_increment_;
   scan_msg->time_increment = 0.0;
-  scan_msg->scan_time = scan_time_;
+  scan_msg->scan_time = scan_time;
   scan_msg->range_min = range_min_;
   scan_msg->range_max = range_max_;
 
@@ -227,7 +240,29 @@ void PointCloudToLaserScanNode::cloudCallback(
       scan_msg->ranges[index] = range;
     }
   }
+  if (scan_msg->ranges.size() > 2)
+    {
+      for (size_t num = 2; num < scan_msg->ranges.size() - 2; ++num)
+      {
+        double distance_front = fabs(scan_msg->ranges.at(num) - scan_msg->ranges.at(num-2));
+        double distance_back = fabs(scan_msg->ranges.at(num) - scan_msg->ranges.at(num+2));
+        if ((distance_front > 0.05 || scan_msg->ranges.at(num-1) == std::numeric_limits<double>::infinity()) 
+            && (distance_back > 0.05 || scan_msg->ranges.at(num+1) == std::numeric_limits<double>::infinity()))
+        {
+          scan_msg->ranges.at(num) = std::numeric_limits<double>::infinity();
+        }
+      }
+    }
+  int beam_size = static_cast<int>(scan_msg->ranges.size());
+  if (beam_size <= 1) {
+      scan_msg->time_increment = 0;
+  } else {
+      scan_msg->time_increment = static_cast<float>(scan_time / (double)(beam_size - 1));
+  }
+  rclcpp::Time header_stamp_time = scan_msg->header.stamp;
+  scan_msg->header.stamp = header_stamp_time - rclcpp::Duration::from_seconds(scan_time);
   pub_->publish(std::move(scan_msg));
+  end_scan_time = start_scan_time;
 }
 
 }  // namespace pointcloud_to_laserscan

@@ -21,7 +21,7 @@ parameters_back = [{
 parameters_front_up = [{
         'target_frame': 'base_link',
         'transform_tolerance': 0.01,
-        'min_height': -0.39,
+        'min_height': -0.40,
         'max_height': 1.0,
         'angle_min': -0.614,
         'angle_max': 0.614,
@@ -36,7 +36,7 @@ parameters_front_up = [{
 parameters_front_down = [{
         'target_frame': 'base_link',
         'transform_tolerance': 0.01,
-        'min_height': -0.39,
+        'min_height': -0.35,
         'max_height': 1.0,
         'angle_min': -0.614,
         'angle_max': 0.614,
