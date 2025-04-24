@@ -2,12 +2,41 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+import os
+
+if 'BACK_DEPTH_MIN_HEIGHT' and 'BACK_DEPTH_MAX_HEIGHT' in os.environ:
+    back_depth_min_height = float(os.environ.get('BACK_DEPTH_MIN_HEIGHT'))
+    back_depth_max_height = float(os.environ.get('BACK_DEPTH_MAX_HEIGHT'))
+else:
+    back_depth_min_height = -0.35
+    back_depth_max_height = 1.0
+
+if 'FRONT_DEPTH_MIN_HEIGHT' and 'FRONT_DEPTH_MAX_HEIGHT' in os.environ:
+    front_depth_min_height = float(os.environ.get('FRONT_DEPTH_MIN_HEIGHT'))
+    front_depth_max_height = float(os.environ.get('FRONT_DEPTH_MAX_HEIGHT'))
+else:
+    front_depth_min_height = -0.35
+    front_depth_max_height = 1.0
+
+if 'LEFT_DEPTH_MIN_HEIGHT' and 'LEFT_DEPTH_MAX_HEIGHT' in os.environ:
+    left_depth_min_height = float(os.environ.get('LEFT_DEPTH_MIN_HEIGHT'))
+    left_depth_max_height = float(os.environ.get('LEFT_DEPTH_MAX_HEIGHT'))
+else:
+    left_depth_min_height = -0.35
+    left_depth_max_height = 1.5
+
+if 'RIGHT_DEPTH_MIN_HEIGHT' and 'RIGHT_DEPTH_MAX_HEIGHT' in os.environ:
+    right_depth_min_height = float(os.environ.get('RIGHT_DEPTH_MIN_HEIGHT'))
+    right_depth_max_height = float(os.environ.get('RIGHT_DEPTH_MAX_HEIGHT'))
+else:
+    right_depth_min_height = -0.35
+    right_depth_max_height = 1.5
 
 front_camera = [{
         'target_frame': 'base_link',
         'transform_tolerance': 0.01,
-        'min_height': -0.927,
-        'max_height': 0.5,
+        'min_height': front_depth_min_height,
+        'max_height': front_depth_max_height,
         'angle_min': -0.614,
         'angle_max': 0.614,
         'angle_increment': 0.00766,
@@ -21,8 +50,8 @@ front_camera = [{
 right_camera = [{
         'target_frame': 'base_link',
         'transform_tolerance': 0.01,
-        'min_height': -0.40,
-        'max_height': 1.0,
+        'min_height': right_depth_min_height,
+        'max_height': right_depth_max_height,
         'angle_min': -0.614,
         'angle_max': 0.614,
         'angle_increment': 0.00766,
@@ -36,8 +65,8 @@ right_camera = [{
 back_camera = [{
         'target_frame': 'base_link',
         'transform_tolerance': 0.01,
-        'min_height': -0.35,
-        'max_height': 1.0,
+        'min_height': back_depth_min_height,
+        'max_height': back_depth_max_height,
         'angle_min': -0.614,
         'angle_max': 0.614,
         'angle_increment': 0.00766,
@@ -51,8 +80,8 @@ back_camera = [{
 left_camera = [{
         'target_frame': 'base_link',
         'transform_tolerance': 0.01,
-        'min_height': -0.35,
-        'max_height': 1.0,
+        'min_height': left_depth_min_height,
+        'max_height': left_depth_max_height,
         'angle_min': -0.614,
         'angle_max': 0.614,
         'angle_increment': 0.00766,
