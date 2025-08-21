@@ -92,6 +92,21 @@ left_camera = [{
         'inf_epsilon': 1.0
     }]
 
+laser_3d_to_2d = [{
+        'target_frame': 'base_link',
+        'transform_tolerance': 0.2,
+        'min_height': 0.3,
+        'max_height': 1.5,
+        'angle_min': -3.14,
+        'angle_max': 3.14,
+        'angle_increment': 0.00766,
+        'scan_time': 0.3333,
+        'range_min': 0.2,
+        'range_max': 15.0,
+        'use_inf': True,
+        'inf_epsilon': 1.0
+    }]
+
 
 node_front = Node(
     package='pointcloud_to_laserscan', executable='pointcloud_to_laserscan_node',
@@ -125,14 +140,23 @@ node_left = Node(
     name='pointcloud_to_laserscan_left'
     )
 
+node_3d_to_2d_laserscan = Node(
+    package='pointcloud_to_laserscan', executable='pointcloud_to_laserscan_node',
+    remappings=[('cloud_in', '/vanjee/lidar'),
+                # ('scan', 'point_scan_left')
+                ],
+    parameters=laser_3d_to_2d,
+    name='node_3d_to_2d_laserscan'
+    )
 
 
 
 def generate_launch_description():
     
     return LaunchDescription([
-        node_front,
-        node_right,
-        node_back,
-        node_left    
+        # node_front,
+        # node_right,
+        # node_back,
+        # node_left,
+        node_3d_to_2d_laserscan    
     ])
