@@ -240,19 +240,19 @@ void PointCloudToLaserScanNode::cloudCallback(
       scan_msg->ranges[index] = range;
     }
   }
-  if (scan_msg->ranges.size() > 2)
-    {
-      for (size_t num = 2; num < scan_msg->ranges.size() - 2; ++num)
-      {
-        double distance_front = fabs(scan_msg->ranges.at(num) - scan_msg->ranges.at(num-2));
-        double distance_back = fabs(scan_msg->ranges.at(num) - scan_msg->ranges.at(num+2));
-        if ((distance_front > 0.05 || scan_msg->ranges.at(num-1) == std::numeric_limits<double>::infinity()) 
-            && (distance_back > 0.05 || scan_msg->ranges.at(num+1) == std::numeric_limits<double>::infinity()))
-        {
-          scan_msg->ranges.at(num) = std::numeric_limits<double>::infinity();
-        }
-      }
-    }
+  // if (scan_msg->ranges.size() > 2)
+  //   {
+  //     for (size_t num = 2; num < scan_msg->ranges.size() - 2; ++num)
+  //     {
+  //       double distance_front = fabs(scan_msg->ranges.at(num) - scan_msg->ranges.at(num-2));
+  //       double distance_back = fabs(scan_msg->ranges.at(num) - scan_msg->ranges.at(num+2));
+  //       if ((distance_front > 0.05 || scan_msg->ranges.at(num-1) == std::numeric_limits<double>::infinity()) 
+  //           && (distance_back > 0.05 || scan_msg->ranges.at(num+1) == std::numeric_limits<double>::infinity()))
+  //       {
+  //         scan_msg->ranges.at(num) = std::numeric_limits<double>::infinity();
+  //       }
+  //     }
+  //   }
   int beam_size = static_cast<int>(scan_msg->ranges.size());
   if (beam_size <= 1) {
       scan_msg->time_increment = 0;
